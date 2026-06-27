@@ -35,3 +35,20 @@ export interface Grant {
 
 /** 円→ドル換算に用いる参考レート（表示用）。 */
 export const JPY_PER_USD = 150;
+
+export type NewsType = "公募" | "採択";
+
+export interface NewsItem {
+  id: string;
+  /** 公募 = 新規の公募・募集、採択 = 採択・契約の決定 */
+  type: NewsType;
+  country: Country;
+  title: string;
+  agency: string;
+  /** 発表日。一部は概ねの時期（詳細は sourceUrl を参照）。 */
+  date: string;
+  summary: string;
+  sourceUrl: string;
+  /** 公募の場合の応募締切（判明分のみ） */
+  deadline?: string;
+}

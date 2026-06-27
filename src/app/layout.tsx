@@ -33,18 +33,21 @@ export default function RootLayout({
             <a href="/" className="text-lg font-semibold tracking-tight">
               🚀 Space & Defense Grants Dashboard
             </a>
-            <nav className="flex gap-6 text-sm font-medium text-zinc-600">
+            <nav className="flex gap-6 text-sm font-medium text-zinc-700">
               <a href="/" className="hover:text-zinc-900">
                 概要
               </a>
               <a href="/grants" className="hover:text-zinc-900">
                 一覧・検索
               </a>
+              <a href="/news" className="hover:text-zinc-900">
+                公募・採択ニュース
+              </a>
             </nav>
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-zinc-200 bg-white py-4 text-center text-xs text-zinc-400">
+        <footer className="border-t border-zinc-200 bg-white py-4 text-center text-xs text-zinc-500">
           公式発表・報道に基づく実在の契約データ（各案件に出典リンクあり）。日本円は参考レート 1USD=150円 で換算。
         </footer>
       </body>

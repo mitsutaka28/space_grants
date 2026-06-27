@@ -45,7 +45,7 @@ export default function Home() {
             企業別 獲得金額ランキング（上位12社）
           </h2>
           <CompanyRankingChart data={companyRanking} />
-          <p className="mt-2 text-xs text-zinc-400">
+          <p className="mt-2 text-xs text-zinc-600">
             ■ 青: 米国企業　■ 赤: 日本企業
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function Home() {
           <tbody>
             {rankByCompany(grants).map((c, i) => (
               <tr key={`${c.company}-${c.country}`} className="border-b border-zinc-100">
-                <td className="py-2 text-zinc-400">{i + 1}</td>
+                <td className="py-2 text-zinc-500">{i + 1}</td>
                 <td className="py-2 font-medium">{c.company}</td>
                 <td className="py-2">
                   <span
