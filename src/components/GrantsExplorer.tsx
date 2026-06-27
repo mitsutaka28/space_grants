@@ -48,6 +48,37 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
 
   const totalUsd = filtered.reduce((sum, g) => sum + g.amountUsd, 0);
 
+  const exportCsv = () => {
+    const headers = [
+      "id",
+      "company",
+      "country",
+      "agency",
+      "program",
+      "theme",
+      "amountUsd",
+      "fiscalYear",
+      "awardDate",
+      "description",
+      "sourceUrl",
+    ];
+    const escape = (v: string | number) => {
+      const s = String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = filtered.map((g) =>
+      headers.map((h) => escape(g[h as keyof Grant])).join(",")
+    );
+    const csv = "﻿" + [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `space_grants_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 rounded-xl border border-zinc-200 bg-white p-4">
@@ -101,9 +132,18 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
         </button>
       </div>
 
-      <p className="text-sm text-zinc-500">
-        {filtered.length}件 / 合計 {formatUsd(totalUsd)}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-zinc-500">
+          {filtered.length}件 / 合計 {formatUsd(totalUsd)}
+        </p>
+        <button
+          onClick={exportCsv}
+          disabled={filtered.length === 0}
+          className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          CSVダウンロード ⬇
+        </button>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
         <table className="w-full text-sm">

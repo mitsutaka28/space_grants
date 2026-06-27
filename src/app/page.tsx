@@ -1,17 +1,22 @@
 import { grants } from "@/data/grants";
 import {
+  aggregateByAgency,
   aggregateByCountry,
   aggregateByTheme,
+  aggregateByYear,
   formatUsd,
   rankByCompany,
 } from "@/lib/aggregate";
 import CompanyRankingChart from "@/components/CompanyRankingChart";
 import ThemePieChart from "@/components/ThemePieChart";
+import YearlyTrendChart from "@/components/YearlyTrendChart";
 
 export default function Home() {
   const companyRanking = rankByCompany(grants).slice(0, 12);
   const themeAgg = aggregateByTheme(grants);
   const countryAgg = aggregateByCountry(grants);
+  const yearAgg = aggregateByYear(grants);
+  const agencyAgg = aggregateByAgency(grants).slice(0, 10);
   const totalUsd = grants.reduce((sum, g) => sum + g.amountUsd, 0);
 
   const us = countryAgg.find((c) => c.country === "US");
@@ -49,6 +54,50 @@ export default function Home() {
             テーマ別 獲得金額シェア
           </h2>
           <ThemePieChart data={themeAgg} />
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <h2 className="mb-3 text-sm font-semibold text-zinc-700">
+            年度別 獲得金額推移（米日比較）
+          </h2>
+          <YearlyTrendChart data={yearAgg} />
+        </div>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <h2 className="mb-3 text-sm font-semibold text-zinc-700">
+            機関別 獲得金額ランキング（上位10機関）
+          </h2>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-zinc-200 text-left text-zinc-500">
+                <th className="py-2">機関</th>
+                <th className="py-2">国</th>
+                <th className="py-2 text-right">獲得金額</th>
+                <th className="py-2 text-right">件数</th>
+              </tr>
+            </thead>
+            <tbody>
+              {agencyAgg.map((a) => (
+                <tr key={a.agency} className="border-b border-zinc-100">
+                  <td className="py-2 font-medium">{a.agency}</td>
+                  <td className="py-2">
+                    <span
+                      className={
+                        a.country === "US"
+                          ? "rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+                          : "rounded bg-red-50 px-2 py-0.5 text-xs text-red-700"
+                      }
+                    >
+                      {a.country === "US" ? "米国" : "日本"}
+                    </span>
+                  </td>
+                  <td className="py-2 text-right">{formatUsd(a.totalUsd)}</td>
+                  <td className="py-2 text-right">{a.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
