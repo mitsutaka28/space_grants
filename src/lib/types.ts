@@ -1,5 +1,7 @@
 export type Country = "US" | "JP";
 
+export type Currency = "USD" | "JPY";
+
 export type Theme =
   | "衛星・リモートセンシング"
   | "ロケット・打上げ"
@@ -19,9 +21,17 @@ export interface Grant {
   agency: string;
   program: string;
   theme: Theme;
+  /** 米ドル換算額（集計・比較用の基準値）。日本円は JPY_PER_USD で換算。 */
   amountUsd: number;
+  /** 公表された原通貨での金額 */
+  amountOriginal: number;
+  currency: Currency;
   fiscalYear: number;
   awardDate: string;
   description: string;
+  /** 一次情報・報道など検証可能な出典URL */
   sourceUrl: string;
 }
+
+/** 円→ドル換算に用いる参考レート（表示用）。 */
+export const JPY_PER_USD = 150;

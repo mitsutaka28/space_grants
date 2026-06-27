@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Grant, Theme } from "@/lib/types";
-import { formatUsd } from "@/lib/aggregate";
+import { formatOriginal, formatUsd } from "@/lib/aggregate";
 
 const THEMES: Theme[] = [
   "衛星・リモートセンシング",
@@ -57,6 +57,8 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
       "program",
       "theme",
       "amountUsd",
+      "amountOriginal",
+      "currency",
       "fiscalYear",
       "awardDate",
       "description",
@@ -154,9 +156,10 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
               <th className="px-4 py-2">機関</th>
               <th className="px-4 py-2">プログラム</th>
               <th className="px-4 py-2">テーマ</th>
-              <th className="px-4 py-2 text-right">金額</th>
+              <th className="px-4 py-2 text-right">金額 (USD)</th>
               <th className="px-4 py-2">年度</th>
               <th className="px-4 py-2">採択日</th>
+              <th className="px-4 py-2">出典</th>
             </tr>
           </thead>
           <tbody>
@@ -186,14 +189,29 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
                 </td>
                 <td className="px-4 py-2 text-right font-medium">
                   {formatUsd(g.amountUsd)}
+                  {g.currency !== "USD" && (
+                    <div className="text-xs font-normal text-zinc-400">
+                      {formatOriginal(g.amountOriginal, g.currency)}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-2 text-zinc-600">{g.fiscalYear}</td>
                 <td className="px-4 py-2 text-zinc-600">{g.awardDate}</td>
+                <td className="px-4 py-2">
+                  <a
+                    href={g.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    リンク ↗
+                  </a>
+                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-zinc-400">
+                <td colSpan={9} className="px-4 py-8 text-center text-zinc-400">
                   該当する案件がありません
                 </td>
               </tr>

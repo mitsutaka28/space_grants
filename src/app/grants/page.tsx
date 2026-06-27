@@ -7,7 +7,7 @@ export default function GrantsPage() {
       <div>
         <h1 className="text-xl font-semibold">案件一覧・検索</h1>
         <p className="text-sm text-zinc-500">
-          米国・日本の宇宙・防衛関連の補助金・政府調達案件を検索・フィルタできます。
+          米国・日本の宇宙・防衛関連の実在の契約・調達案件を検索・フィルタできます。各案件は出典リンクで検証可能です。
         </p>
       </div>
       <GrantsExplorer grants={grants} />

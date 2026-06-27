@@ -3,7 +3,17 @@ import { Grant } from "@/lib/types";
 export function formatUsd(amount: number): string {
   if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toFixed(2)}B`;
   if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
-  return `$${amount.toLocaleString()}`;
+  return `$${Math.round(amount).toLocaleString()}`;
+}
+
+/** 原通貨での表示（円は「億円」表記、ドルは $ 表記）。 */
+export function formatOriginal(amount: number, currency: Grant["currency"]): string {
+  if (currency === "JPY") {
+    if (amount >= 1_000_000_000_000) return `${(amount / 1_000_000_000_000).toFixed(2)}兆円`;
+    if (amount >= 100_000_000) return `${Math.round(amount / 100_000_000).toLocaleString()}億円`;
+    return `${amount.toLocaleString()}円`;
+  }
+  return formatUsd(amount);
 }
 
 export interface CompanyAgg {

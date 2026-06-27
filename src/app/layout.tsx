@@ -45,7 +45,7 @@ export default function RootLayout({
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-zinc-200 bg-white py-4 text-center text-xs text-zinc-400">
-          サンプルデータに基づくデモダッシュボードです。実際の調達・補助金情報とは異なります。
+          公式発表・報道に基づく実在の契約データ（各案件に出典リンクあり）。日本円は参考レート 1USD=150円 で換算。
         </footer>
       </body>
     </html>
