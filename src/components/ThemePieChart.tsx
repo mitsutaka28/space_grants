@@ -26,8 +26,11 @@ export default function ThemePieChart({ data }: { data: ThemeAgg[] }) {
           nameKey="theme"
           cx="50%"
           cy="50%"
-          outerRadius={140}
-          label={(entry) => entry.name}
+          outerRadius={130}
+          label={({ percent }) =>
+            percent && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
+          }
+          labelLine={false}
         >
           {data.map((_, i) => (
             <Cell key={i} fill={COLORS[i % COLORS.length]} />
