@@ -27,27 +27,27 @@ export default function RootLayout({
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
-        <header className="border-b border-zinc-200 bg-white">
+      <body className="min-h-full flex flex-col text-slate-100">
+        <header className="glass sticky top-0 z-10 border-x-0 border-t-0">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <a href="/" className="text-lg font-semibold tracking-tight">
-              🚀 Space & Defense Grants Dashboard
+            <a href="/" className="text-lg font-semibold tracking-tight text-white">
+              🛰️ Space &amp; Defense Grants Dashboard
             </a>
-            <nav className="flex gap-6 text-sm font-medium text-zinc-700">
-              <a href="/" className="hover:text-zinc-900">
+            <nav className="flex gap-6 text-sm font-medium text-slate-300">
+              <a href="/" className="transition-colors hover:text-cyan-300">
                 概要
               </a>
-              <a href="/grants" className="hover:text-zinc-900">
+              <a href="/grants" className="transition-colors hover:text-cyan-300">
                 一覧・検索
               </a>
-              <a href="/news" className="hover:text-zinc-900">
+              <a href="/news" className="transition-colors hover:text-cyan-300">
                 公募・採択ニュース
               </a>
             </nav>
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-zinc-200 bg-white py-4 text-center text-xs text-zinc-500">
+        <footer className="glass border-x-0 border-b-0 py-4 text-center text-xs text-slate-400">
           公式発表・報道に基づく実在の契約データ（各案件に出典リンクあり）。日本円は参考レート 1USD=150円 で換算。
         </footer>
       </body>

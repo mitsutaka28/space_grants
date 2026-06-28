@@ -31,6 +31,8 @@ export interface Grant {
   description: string;
   /** 一次情報・報道など検証可能な出典URL */
   sourceUrl: string;
+  /** 自動収集（USAspending.gov 等）由来の場合 true。手動キュレーションは未設定。 */
+  auto?: boolean;
 }
 
 /** 円→ドル換算に用いる参考レート（表示用）。 */

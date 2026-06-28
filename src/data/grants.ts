@@ -1,8 +1,9 @@
 import { Grant } from "@/lib/types";
+import collected from "@/data/collected.json";
 
 // すべて実在の契約・調達。金額・日付は公式発表または報道に基づき、各 sourceUrl で検証可能。
 // 日本円の案件は amountOriginal(円) を保持し、amountUsd は 1USD=150円 で換算した参考値。
-export const grants: Grant[] = [
+const curatedGrants: Grant[] = [
   // ===== 米国 =====
   {
     id: "us-nssl-spacex",
@@ -270,4 +271,13 @@ export const grants: Grant[] = [
     sourceUrl:
       "https://astroscale.com/ja/astroscale-japan-secures-contract-for-phase-ii-of-jaxas-commercial-removal-of-debris-demonstration-program/",
   },
+];
+
+// 自動収集（scripts/collect.mjs が GitHub Actions で定期取得し collected.json に書き出す）。
+// id の重複を除いてキュレーション済みデータに統合する。
+const autoGrants = (collected as Grant[]).map((g) => ({ ...g, auto: true }));
+const seen = new Set(curatedGrants.map((g) => g.id));
+export const grants: Grant[] = [
+  ...curatedGrants,
+  ...autoGrants.filter((g) => !seen.has(g.id)),
 ];

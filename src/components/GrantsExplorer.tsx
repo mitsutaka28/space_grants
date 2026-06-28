@@ -64,8 +64,8 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
       "description",
       "sourceUrl",
     ];
-    const escape = (v: string | number) => {
-      const s = String(v);
+    const escape = (v: string | number | boolean | undefined) => {
+      const s = String(v ?? "");
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const rows = filtered.map((g) =>
@@ -83,18 +83,18 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-3 rounded-xl border border-zinc-200 bg-white p-4">
+      <div className="glass flex flex-wrap gap-3 rounded-2xl p-4">
         <input
           type="text"
           placeholder="企業名・機関・プログラム・キーワードで検索"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="min-w-[260px] flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="min-w-[260px] flex-1 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-100 placeholder-slate-400 focus:border-cyan-400/60 focus:outline-none"
         />
         <select
           value={country}
           onChange={(e) => setCountry(e.target.value as "ALL" | "US" | "JP")}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-100"
         >
           <option value="ALL">国: すべて</option>
           <option value="US">米国</option>
@@ -103,7 +103,7 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
         <select
           value={theme}
           onChange={(e) => setTheme(e.target.value as "ALL" | Theme)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-100"
         >
           <option value="ALL">テーマ: すべて</option>
           {THEMES.map((t) => (
@@ -117,7 +117,7 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
           onChange={(e) =>
             setYear(e.target.value === "ALL" ? "ALL" : Number(e.target.value))
           }
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-100"
         >
           <option value="ALL">年度: すべて</option>
           {years.map((y) => (
@@ -128,81 +128,88 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
         </select>
         <button
           onClick={() => setSortDesc((s) => !s)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50"
+          className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
         >
           金額 {sortDesc ? "降順" : "昇順"} ↕
         </button>
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-500">
-          {filtered.length}件 / 合計 {formatUsd(totalUsd)}
+        <p className="text-sm text-slate-300">
+          {filtered.length}件 / 合計 <span className="text-cyan-300">{formatUsd(totalUsd)}</span>
         </p>
         <button
           onClick={exportCsv}
           disabled={filtered.length === 0}
-          className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           CSVダウンロード ⬇
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+      <div className="glass overflow-x-auto rounded-2xl">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 text-left text-zinc-500">
-              <th className="px-4 py-2">企業</th>
-              <th className="px-4 py-2">国</th>
-              <th className="px-4 py-2">機関</th>
-              <th className="px-4 py-2">プログラム</th>
-              <th className="px-4 py-2">テーマ</th>
-              <th className="px-4 py-2 text-right">金額 (USD)</th>
-              <th className="px-4 py-2">年度</th>
-              <th className="px-4 py-2">採択日</th>
-              <th className="px-4 py-2">出典</th>
+            <tr className="border-b border-white/10 text-left text-slate-400">
+              <th className="px-4 py-2 font-medium">企業</th>
+              <th className="px-4 py-2 font-medium">国</th>
+              <th className="px-4 py-2 font-medium">機関</th>
+              <th className="px-4 py-2 font-medium">プログラム</th>
+              <th className="px-4 py-2 font-medium">テーマ</th>
+              <th className="px-4 py-2 text-right font-medium">金額 (USD)</th>
+              <th className="px-4 py-2 font-medium">年度</th>
+              <th className="px-4 py-2 font-medium">採択日</th>
+              <th className="px-4 py-2 font-medium">出典</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((g) => (
-              <tr key={g.id} className="border-b border-zinc-100 align-top">
-                <td className="px-4 py-2 font-medium">{g.company}</td>
+              <tr key={g.id} className="border-b border-white/5 align-top hover:bg-white/5">
+                <td className="px-4 py-2 font-medium text-white">
+                  {g.company}
+                  {g.auto && (
+                    <span className="ml-1 rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-normal text-amber-200">
+                      自動収集
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-2">
                   <span
                     className={
                       g.country === "US"
-                        ? "rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
-                        : "rounded bg-red-50 px-2 py-0.5 text-xs text-red-700"
+                        ? "rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-200"
+                        : "rounded bg-rose-500/20 px-2 py-0.5 text-xs text-rose-200"
                     }
                   >
                     {g.country === "US" ? "米国" : "日本"}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-zinc-600">{g.agency}</td>
-                <td className="px-4 py-2 text-zinc-600">
-                  <div className="font-medium text-zinc-800">{g.program}</div>
-                  <div className="text-xs text-zinc-600">{g.description}</div>
+                <td className="px-4 py-2 text-slate-300">{g.agency}</td>
+                <td className="px-4 py-2 text-slate-300">
+                  <div className="font-medium text-slate-100">{g.program}</div>
+                  <div className="text-xs text-slate-400">{g.description}</div>
                 </td>
                 <td className="px-4 py-2">
-                  <span className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
+                  <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-slate-200">
                     {g.theme}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-right font-medium">
+                <td className="px-4 py-2 text-right font-medium text-cyan-300">
                   {formatUsd(g.amountUsd)}
                   {g.currency !== "USD" && (
-                    <div className="text-xs font-normal text-zinc-500">
+                    <div className="text-xs font-normal text-slate-400">
                       {formatOriginal(g.amountOriginal, g.currency)}
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-2 text-zinc-600">{g.fiscalYear}</td>
-                <td className="px-4 py-2 text-zinc-600">{g.awardDate}</td>
+                <td className="px-4 py-2 text-slate-300">{g.fiscalYear}</td>
+                <td className="px-4 py-2 text-slate-300">{g.awardDate}</td>
                 <td className="px-4 py-2">
                   <a
                     href={g.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="text-cyan-400 hover:underline"
                   >
                     リンク ↗
                   </a>
@@ -211,7 +218,7 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-zinc-500">
+                <td colSpan={9} className="px-4 py-8 text-center text-slate-400">
                   該当する案件がありません
                 </td>
               </tr>
