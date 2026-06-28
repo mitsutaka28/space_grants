@@ -22,8 +22,9 @@ export default function GrantsPage() {
           </li>
           <li>
             <span className="text-slate-100">自動収集（週次）</span>:
-            USAspending.gov（連邦の契約・補助金）と SBIR.gov（SBIR/STTR 交付）から、宇宙・防衛キーワードで
-            複数省庁分を取得。「自動収集」バッジ付きで表示。
+            SpaceNews / NASA / 米国防省のRSSフィードや JAXA
+            のプレスリリース一覧などをクローリングし、宇宙・防衛キーワードと金額表記を検出して抽出。
+            構造化APIへの直接問い合わせは行わず、公開されている記事・発表ページのみを参照。「自動収集」バッジ付きで表示。
           </li>
           <li>
             日本は公開APIが乏しいため手動キュレーション中心。円は参考レート 1USD=150円 で換算。

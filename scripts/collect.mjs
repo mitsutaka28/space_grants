@@ -1,36 +1,46 @@
-// 宇宙・防衛関連の政府調達「契約」と「補助金(grant)」を、公開API（認証不要）から
-// 網羅的に定期収集する。
-//   - USAspending.gov : 連邦の契約(A-D)と補助金(02-05)を複数省庁から取得
-//   - SBIR.gov        : SBIR/STTR の交付（中小企業向け補助金）を取得
+// 宇宙・防衛関連の政府調達「契約」と「補助金(grant)」を、Web検索/クローリングで
+// 定期収集する。
+//   - 公式RSSフィード（SpaceNews, NASA, DoD Contracts 等）を巡回
+//   - JAXA / 防衛省 などの公式お知らせページをHTMLスクレイピング
+// 構造化APIへの直接問い合わせ（USAspending.gov / SBIR.gov 等）は使わず、
+// 一般的なWebクロール手法（RSS取得・HTML解析）のみで収集する。
+//
 // GitHub Actions（.github/workflows/collect.yml）から週次で実行し、
 // 結果を src/data/collected.json に書き出す。差分があれば Actions がコミットする。
 //
-// 注意: 一部のネットワーク環境では外部APIへの接続が制限される。その場合は
+// 注意: 一部のネットワーク環境では外部サイトへの接続が制限される。その場合は
 // 既存の collected.json を保持して終了する（CIランナーでは外部接続可）。
 
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import * as cheerio from "cheerio";
+import Parser from "rss-parser";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, "..", "src", "data", "collected.json");
-const USA_API = "https://api.usaspending.gov/api/v2/search/spending_by_award/";
-const SBIR_API = "https://api.www.sbir.gov/public/api/awards";
-
-const MIN_AMOUNT = 2_000_000; // ノイズ除去のしきい値（補助金は契約より小さいため低め）
 const MAX_RECORDS = 200;
+const UA = "Mozilla/5.0 (compatible; SpaceGrantsBot/1.0; +informational research crawler)";
+
+const parser = new Parser({
+  headers: { "User-Agent": UA },
+  timeout: 20000,
+});
+
+const SPACE_DEFENSE_KEYWORDS =
+  /space|satellite|launch|rocket|missile|hypersonic|lunar|moon|mars|orbital|spacecraft|defense contract|SDA|NSSL|NRO/i;
 
 const THEME_RULES = [
   [/launch|rocket|booster/i, "ロケット・打上げ"],
   [/propuls|engine|thruster/i, "推進システム"],
   [/missile|interceptor|hypersonic/i, "ミサイル防衛"],
-  [/satellite|imagery|earth observation|remote sensing|\bsar\b/i, "衛星・リモートセンシング"],
-  [/space domain|situational|debris|tracking layer|missile warning|space surveillance/i, "宇宙状況監視(SSA)"],
-  [/lunar|moon|mars|deep space|exploration|planetary/i, "月・深宇宙探査"],
-  [/uav|unmanned|autonom|drone/i, "無人機・自律システム"],
-  [/cyber/i, "サイバー防衛"],
-  [/command|control|\bc2\b|artificial intelligence|machine learning/i, "AI・指揮統制"],
-  [/satcom|communication|transport layer|data link/i, "通信・データリンク"],
+  [/satellite|imagery|earth observation|remote sensing|\bsar\b|衛星/i, "衛星・リモートセンシング"],
+  [/space domain|situational|debris|tracking layer|missile warning|space surveillance|宇宙状況監視/i, "宇宙状況監視(SSA)"],
+  [/lunar|moon|mars|deep space|exploration|planetary|月|探査/i, "月・深宇宙探査"],
+  [/uav|unmanned|autonom|drone|無人機/i, "無人機・自律システム"],
+  [/cyber|サイバー/i, "サイバー防衛"],
+  [/command|control|\bc2\b|artificial intelligence|machine learning|AI|指揮統制/i, "AI・指揮統制"],
+  [/satcom|communication|transport layer|data link|通信/i, "通信・データリンク"],
 ];
 
 function classifyTheme(text = "") {
@@ -38,132 +48,127 @@ function classifyTheme(text = "") {
   return "衛星・リモートセンシング";
 }
 
-// ---- USAspending（契約・補助金） ----
-async function fetchUsa(agencyName, keywords, kind) {
-  // kind: "contract" | "grant"
-  const award_type_codes =
-    kind === "grant" ? ["02", "03", "04", "05"] : ["A", "B", "C", "D"];
-  const body = {
-    filters: {
-      keywords,
-      award_type_codes,
-      time_period: [{ start_date: "2022-01-01", end_date: "2030-12-31" }],
-      agencies: [{ type: "awarding", tier: "toptier", name: agencyName }],
-    },
-    fields: [
-      "Award ID",
-      "Recipient Name",
-      "Award Amount",
-      "Awarding Agency",
-      "Description",
-      "Start Date",
-      "generated_internal_id",
-    ],
-    limit: 50,
-    page: 1,
-    sort: "Award Amount",
-    order: "desc",
-  };
-  const res = await fetch(USA_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`USA ${agencyName}/${kind}: HTTP ${res.status}`);
-  const json = await res.json();
-  return (json.results ?? []).map((r) => {
-    const amount = Number(r["Award Amount"]) || 0;
-    const desc = r["Description"] || "";
-    const date = r["Start Date"] || "";
-    return {
-      id: `auto-usa-${r["generated_internal_id"] || r["Award ID"]}`,
-      company: r["Recipient Name"] || "(不明)",
-      country: "US",
-      agency: r["Awarding Agency"] || agencyName,
-      program: `${kind === "grant" ? "[補助金] " : ""}${r["Award ID"] || ""}`.trim(),
-      theme: classifyTheme(`${desc} ${r["Award ID"] || ""}`),
-      amountUsd: amount,
-      amountOriginal: amount,
-      currency: "USD",
-      fiscalYear: date ? Number(String(date).slice(0, 4)) : new Date().getFullYear(),
-      awardDate: date,
-      description: desc.slice(0, 140),
-      sourceUrl: `https://www.usaspending.gov/award/${r["generated_internal_id"] || ""}`,
-      auto: true,
-    };
-  });
+// 本文中の金額表記（$1.2 billion / $450 million / $3,200,000 など）を抽出してUSDに変換
+function extractAmountUsd(text = "") {
+  const billion = text.match(/\$\s?([\d.]+)\s?billion/i);
+  if (billion) return Math.round(parseFloat(billion[1]) * 1_000_000_000);
+  const million = text.match(/\$\s?([\d.]+)\s?million/i);
+  if (million) return Math.round(parseFloat(million[1]) * 1_000_000);
+  const raw = text.match(/\$\s?([\d,]{7,})/);
+  if (raw) return Number(raw[1].replace(/,/g, ""));
+  return 0;
 }
 
-// ---- SBIR.gov（SBIR/STTR 交付＝中小企業向け補助金） ----
-async function fetchSbir(agency, keyword) {
-  const url = `${SBIR_API}?agency=${encodeURIComponent(agency)}&keyword=${encodeURIComponent(
-    keyword
-  )}&rows=50&start=0`;
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`SBIR ${agency}/${keyword}: HTTP ${res.status}`);
-  const rows = await res.json();
-  return (Array.isArray(rows) ? rows : []).map((r) => {
-    const amount = Number(r.award_amount) || 0;
-    const date = r.proposal_award_date || r.award_year || "";
-    const title = r.award_title || "";
-    return {
-      id: `auto-sbir-${r.contract || r.agency_tracking_number || `${r.firm}-${title}`}`,
-      company: r.firm || "(不明)",
-      country: "US",
-      agency: `${r.agency || ""}${r.branch ? " / " + r.branch : ""} (SBIR/STTR)`,
-      program: `[補助金] ${title}`.slice(0, 120),
-      theme: classifyTheme(`${title} ${r.abstract || ""}`),
-      amountUsd: amount,
-      amountOriginal: amount,
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h).toString(36);
+}
+
+// ---- RSSフィード巡回（SpaceNews, NASA, DoD Contracts） ----
+const RSS_FEEDS = [
+  { url: "https://spacenews.com/feed/", agency: "SpaceNews (報道)", country: "US" },
+  { url: "https://www.nasa.gov/news-release/feed/", agency: "NASA", country: "US" },
+  { url: "https://www.defense.gov/News/Contracts/feed/", agency: "U.S. Department of Defense", country: "US" },
+];
+
+async function fetchRss({ url, agency, country }) {
+  const feed = await parser.parseURL(url);
+  const items = [];
+  for (const entry of feed.items ?? []) {
+    const title = entry.title || "";
+    const content = entry.contentSnippet || entry.content || entry.summary || "";
+    const text = `${title} ${content}`;
+    if (!SPACE_DEFENSE_KEYWORDS.test(text)) continue;
+    const amountUsd = extractAmountUsd(text);
+    if (amountUsd <= 0) continue;
+    const date = entry.isoDate || entry.pubDate || "";
+    const companyMatch = title.match(/^([A-Z][\w&.,'\- ]{2,40}?)\s+(?:awarded|wins|to|receives)/i);
+    items.push({
+      id: `auto-rss-${hash(entry.link || title)}`,
+      company: companyMatch ? companyMatch[1].trim() : "(詳細は出典参照)",
+      country,
+      agency,
+      program: title.slice(0, 120),
+      theme: classifyTheme(text),
+      amountUsd,
+      amountOriginal: amountUsd,
       currency: "USD",
-      fiscalYear: Number(String(date).slice(0, 4)) || new Date().getFullYear(),
-      awardDate: typeof date === "string" ? date : "",
-      description: (r.abstract || title).slice(0, 140),
-      sourceUrl: r.award_link || "https://www.sbir.gov/",
+      fiscalYear: date ? new Date(date).getFullYear() : new Date().getFullYear(),
+      awardDate: date ? new Date(date).toISOString().slice(0, 10) : "",
+      description: content.slice(0, 140),
+      sourceUrl: entry.link || url,
       auto: true,
-    };
+    });
+  }
+  return items;
+}
+
+// ---- JAXA プレスリリース一覧（HTMLスクレイピング） ----
+async function fetchJaxaPress() {
+  const url = "https://www.jaxa.jp/press/index_j.html";
+  const res = await fetch(url, {
+    headers: { "User-Agent": UA },
+    signal: AbortSignal.timeout(20000),
   });
+  if (!res.ok) throw new Error(`JAXA press: HTTP ${res.status}`);
+  const html = await res.text();
+  const $ = cheerio.load(html);
+  const items = [];
+  $("a").each((_, el) => {
+    const title = $(el).text().trim();
+    const href = $(el).attr("href");
+    if (!title || !href) return;
+    if (!/採択|契約|委託|補助|基金|宇宙戦略/.test(title)) return;
+    const link = href.startsWith("http") ? href : new URL(href, url).toString();
+    items.push({
+      id: `auto-jaxa-${hash(link || title)}`,
+      company: "(詳細は出典参照)",
+      country: "JP",
+      agency: "JAXA",
+      program: title.slice(0, 120),
+      theme: classifyTheme(title),
+      amountUsd: 0,
+      amountOriginal: 0,
+      currency: "JPY",
+      fiscalYear: new Date().getFullYear(),
+      awardDate: "",
+      description: title.slice(0, 140),
+      sourceUrl: link,
+      auto: true,
+    });
+  });
+  // 金額が不明な項目はノイズが多いため除外（後段のフィルタで切られる）
+  return items;
 }
 
 async function main() {
   const collected = [];
 
-  const usaJobs = [
-    ["National Aeronautics and Space Administration", ["space", "satellite", "launch", "lunar"]],
-    ["Department of Defense", ["space", "satellite", "missile", "launch", "hypersonic"]],
-    ["National Science Foundation", ["space", "satellite", "astronomy"]],
-    ["Department of Energy", ["space", "satellite"]],
-  ];
-  for (const [agency, kw] of usaJobs) {
-    for (const kind of ["contract", "grant"]) {
-      try {
-        const rows = await fetchUsa(agency, kw, kind);
-        collected.push(...rows);
-        console.log(`USAspending ${agency}/${kind}: ${rows.length}`);
-      } catch (e) {
-        console.error(`skip ${e.message}`);
-      }
-    }
-  }
-
-  const sbirJobs = [
-    ["DOD", "space"],
-    ["DOD", "satellite"],
-    ["NASA", "space"],
-  ];
-  for (const [agency, kw] of sbirJobs) {
+  for (const feed of RSS_FEEDS) {
     try {
-      const rows = await fetchSbir(agency, kw);
+      const rows = await fetchRss(feed);
       collected.push(...rows);
-      console.log(`SBIR ${agency}/${kw}: ${rows.length}`);
+      console.log(`RSS ${feed.url}: ${rows.length}`);
     } catch (e) {
-      console.error(`skip ${e.message}`);
+      console.error(`skip ${feed.url}: ${e.message}`);
     }
   }
 
+  try {
+    const rows = await fetchJaxaPress();
+    collected.push(...rows);
+    console.log(`JAXA press: ${rows.length}`);
+  } catch (e) {
+    console.error(`skip JAXA press: ${e.message}`);
+  }
+
+  const MIN_AMOUNT = 2_000_000;
   const usable = collected.filter((g) => g.amountUsd >= MIN_AMOUNT);
   if (usable.length === 0) {
-    console.error("No data collected (network restricted?). Keeping existing file.");
+    console.error("No data collected (network restricted, or no qualifying items this run). Keeping existing file.");
     if (!existsSync(OUT)) writeFileSync(OUT, "[]\n");
     return;
   }
