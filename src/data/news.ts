@@ -3,6 +3,32 @@ import { NewsItem } from "@/lib/types";
 // 実在の公募・採択ニュース。日付は発表日（一部は概ねの時期）。詳細・正確な締切は各 sourceUrl を参照。
 export const news: NewsItem[] = [
   {
+    id: "n-fund-phase3-open",
+    type: "公募",
+    country: "JP",
+    title: "宇宙戦略基金 第3期、新規テーマの公募を開始（募集中）",
+    agency: "JAXA（宇宙戦略基金）",
+    date: "2026-06-12",
+    summary:
+      "第3期（2,000億円・19テーマ）のうち「射点の海上利用技術」「月・小惑星における宇宙資源利用技術」「宇宙交通管理の自立化に向けた事業加速」等の公募を6月12日から順次開始。締切はテーマごとに異なるため公式サイトを参照。",
+    sourceUrl: "https://fund.jaxa.jp/",
+    open: true,
+  },
+  {
+    id: "n-spacewerx-2026-open",
+    type: "公募",
+    country: "US",
+    title: "AFWERX/SpaceWERX、SBIR/STTR新規公募（7月22日受付開始）",
+    agency: "SpaceWERX / AFWERX",
+    date: "2026-07-01",
+    summary:
+      "SBIR再認可法の成立を受けた新規SBIR/STTR公募。プレリリース期間中はトピック担当者への質問が可能で、7月22日（水）から提出受付を開始。",
+    sourceUrl:
+      "https://www.afrl.af.mil/News/Article-Display/Article/4473004/afwerx-spacewerx-open-new-sbirsttr-solicitations-following-reauthorization/",
+    deadline: "2026-07-22 受付開始",
+    open: true,
+  },
+  {
     id: "n-ssc-andromeda",
     type: "採択",
     country: "US",

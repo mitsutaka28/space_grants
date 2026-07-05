@@ -58,4 +58,6 @@ export interface NewsItem {
   sourceUrl: string;
   /** 公募の場合の応募締切（判明分のみ） */
   deadline?: string;
+  /** 現在募集中（応募受付中）の公募の場合 true */
+  open?: boolean;
 }

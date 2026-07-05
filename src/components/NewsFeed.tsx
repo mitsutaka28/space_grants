@@ -4,11 +4,13 @@ import { useState } from "react";
 import { NewsItem, NewsType } from "@/lib/types";
 
 export default function NewsFeed({ items }: { items: NewsItem[] }) {
-  const [type, setType] = useState<"ALL" | NewsType>("ALL");
+  const [type, setType] = useState<"ALL" | "OPEN" | NewsType>("ALL");
   const [country, setCountry] = useState<"ALL" | "US" | "JP">("ALL");
 
   const filtered = items
-    .filter((n) => (type === "ALL" ? true : n.type === type))
+    .filter((n) =>
+      type === "ALL" ? true : type === "OPEN" ? n.type === "公募" && n.open : n.type === type
+    )
     .filter((n) => (country === "ALL" ? true : n.country === country));
 
   return (
@@ -16,9 +18,10 @@ export default function NewsFeed({ items }: { items: NewsItem[] }) {
       <div className="flex flex-wrap gap-2">
         <FilterGroup
           value={type}
-          onChange={(v) => setType(v as "ALL" | NewsType)}
+          onChange={(v) => setType(v as "ALL" | "OPEN" | NewsType)}
           options={[
             ["ALL", "すべて"],
+            ["OPEN", "🟢 募集中"],
             ["公募", "公募"],
             ["採択", "採択"],
           ]}
@@ -50,6 +53,11 @@ export default function NewsFeed({ items }: { items: NewsItem[] }) {
               >
                 {n.type}
               </span>
+              {n.open && (
+                <span className="rounded bg-emerald-400/25 px-2 py-0.5 font-medium text-emerald-100">
+                  🟢 募集中
+                </span>
+              )}
               <span
                 className={
                   n.country === "US"
