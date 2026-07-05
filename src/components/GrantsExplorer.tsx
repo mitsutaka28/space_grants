@@ -167,6 +167,11 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
               <tr key={g.id} className="border-b border-white/5 align-top hover:bg-white/5">
                 <td className="px-4 py-2 font-medium text-white">
                   {g.company}
+                  {g.orgType === "スタートアップ" && (
+                    <span className="ml-1 rounded bg-emerald-400/15 px-1.5 py-0.5 text-[10px] font-normal text-emerald-200">
+                      スタートアップ
+                    </span>
+                  )}
                   {g.auto && (
                     <span className="ml-1 rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-normal text-amber-200">
                       自動収集

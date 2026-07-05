@@ -3,6 +3,87 @@ import { NewsItem } from "@/lib/types";
 // 実在の公募・採択ニュース。日付は発表日（一部は概ねの時期）。詳細・正確な締切は各 sourceUrl を参照。
 export const news: NewsItem[] = [
   {
+    id: "n-ssc-andromeda",
+    type: "採択",
+    country: "US",
+    title: "米宇宙軍、宇宙領域把握「Andromeda」で14社に総額$1.84Bを発注",
+    agency: "U.S. Space Force (SSC)",
+    date: "2026-04-01",
+    summary:
+      "軌道上脅威追跡を拡大する10年IDIQ（上限$6.24B）。True Anomaly・Astranis・Anduril等の新興勢とLockheed Martin・Northrop Grumman等の大手が混在して選定。",
+    sourceUrl:
+      "https://www.militaryaerospace.com/communications/article/55369846/space-systems-command-awards-18-billion-andromeda-contracts-for-space-based-sda",
+  },
+  {
+    id: "n-ssc-sbi",
+    type: "採択",
+    country: "US",
+    title: "米宇宙軍、宇宙配備型迎撃体（SBI）関連で12社に総額$3.2Bを発注",
+    agency: "U.S. Space Force (SSC)",
+    date: "2026-04-26",
+    summary:
+      "Golden Dome構想に向けた宇宙配備型迎撃体の開発で、Anduril・True Anomaly・SpaceX等を含む12社が計20件のOTA契約を獲得。",
+    sourceUrl:
+      "https://www.satellitetoday.com/government-military/2026/04/26/space-force-awards-3-2-billion-to-12-companies-for-space-based-interceptor-work/",
+  },
+  {
+    id: "n-sda-t3tl",
+    type: "採択",
+    country: "US",
+    title: "SDA、Tranche 3 Tracking Layer 72機を4社に総額$3.5Bで発注",
+    agency: "Space Development Agency",
+    date: "2025-12-19",
+    summary:
+      "ミサイル警戒・追尾衛星72機をLockheed Martin($1.1B)・L3Harris($843M)・Rocket Lab($816M)・Northrop Grumman($764M)に発注。FY2029打上げ予定。",
+    sourceUrl:
+      "https://www.sda.mil/space-development-agency-makes-awards-to-build-72-tracking-layer-satellites-for-tranche-3/",
+  },
+  {
+    id: "n-stratfi-2025",
+    type: "採択",
+    country: "US",
+    title: "SpaceWERX、STRATFI 2025で8社（総額$440M）を選定",
+    agency: "U.S. Space Force (SpaceWERX)",
+    date: "2025-03-08",
+    summary:
+      "Albedo・Beast Code・CesiumAstro・Gravitics・LeoLabs・Rise8・Umbra・Xonaの8社を選定。1社最大$60M（政府+民間マッチング）で、スタートアップの防衛宇宙参入の主要ルート。",
+    sourceUrl:
+      "https://spacenews.com/spacewerx-selects-eight-companies-for-440-million-in-public-private-partnerships/",
+  },
+  {
+    id: "n-fund-phase1-done",
+    type: "採択",
+    country: "JP",
+    title: "宇宙戦略基金 第1期（3,000億円）の採択が出揃う — スタートアップ16社に388億円",
+    agency: "JAXA（宇宙戦略基金）",
+    date: "2025-02-28",
+    summary:
+      "第1期の採択結果が完了。スタートアップ16社に計388億円が配分され、輸送・衛星・探査の各分野で民間主導の開発が本格化。",
+    sourceUrl: "https://sorabatake.jp/39799/",
+  },
+  {
+    id: "n-fund-phase2-109",
+    type: "採択",
+    country: "JP",
+    title: "宇宙戦略基金 第2期、21テーマ・109件の採択が進行（2026年3月時点）",
+    agency: "JAXA（宇宙戦略基金）",
+    date: "2026-03-31",
+    summary:
+      "総額3,000億円・24テーマの第2期はNEC・三菱電機などの大手からアストロスケール・ispace等のスタートアップまで幅広く採択。非宇宙プレイヤーの参入促進を重視。",
+    sourceUrl: "https://fund.jaxa.jp/techlist/",
+  },
+  {
+    id: "n-fund-axelspace",
+    type: "採択",
+    country: "JP",
+    title: "アクセルスペース、宇宙戦略基金「次世代地球観測衛星に向けた観測機能高度化技術」に採択",
+    agency: "JAXA（宇宙戦略基金）",
+    date: "2026-03-23",
+    summary:
+      "連携機関3社とともに次世代地球観測衛星の観測機能高度化技術の開発に採択。衛星データ利用システム実装加速化事業（RESTEC代表、Synspective等参画）にも別途採択。",
+    sourceUrl: "https://www.businesswire.com/news/home/20260323261716/ja",
+  },
+  {
     id: "n-mod-trisat",
     type: "採択",
     country: "JP",

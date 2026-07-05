@@ -40,6 +40,9 @@ export default function RootLayout({
               <a href="/grants" className="transition-colors hover:text-cyan-300">
                 一覧・検索
               </a>
+              <a href="/sourcing" className="transition-colors hover:text-cyan-300">
+                ソーシング
+              </a>
               <a href="/news" className="transition-colors hover:text-cyan-300">
                 公募・採択ニュース
               </a>

@@ -14,6 +14,9 @@ export type Theme =
   | "月・深宇宙探査"
   | "通信・データリンク";
 
+/** ソーシング観点での企業区分 */
+export type OrgType = "スタートアップ" | "大手・既存" | "コンソーシアム等";
+
 export interface Grant {
   id: string;
   company: string;
@@ -31,8 +34,10 @@ export interface Grant {
   description: string;
   /** 一次情報・報道など検証可能な出典URL */
   sourceUrl: string;
-  /** 自動収集（USAspending.gov 等）由来の場合 true。手動キュレーションは未設定。 */
+  /** 自動収集（RSS/クローリング）由来の場合 true。手動キュレーションは未設定。 */
   auto?: boolean;
+  /** 企業区分（スタートアップ・大手など）。ソーシング用のフィルタに使用。 */
+  orgType?: OrgType;
 }
 
 /** 円→ドル換算に用いる参考レート（表示用）。 */

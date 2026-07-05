@@ -1,5 +1,40 @@
-import { Grant } from "@/lib/types";
+import { Grant, OrgType } from "@/lib/types";
 import collected from "@/data/collected.json";
+
+// 企業区分（ソーシング用）。設立から日が浅い・VC資金で成長中の企業をスタートアップとする。
+const ORG_TYPES: Record<string, OrgType> = {
+  // US スタートアップ・新興
+  SpaceX: "スタートアップ",
+  "Blue Origin": "スタートアップ",
+  BlackSky: "スタートアップ",
+  "York Space Systems": "スタートアップ",
+  "Rocket Lab": "スタートアップ",
+  Gravitics: "スタートアップ",
+  Albedo: "スタートアップ",
+  CesiumAstro: "スタートアップ",
+  LeoLabs: "スタートアップ",
+  Umbra: "スタートアップ",
+  "Xona Space Systems": "スタートアップ",
+  "Anduril Industries": "スタートアップ",
+  // US 大手
+  "United Launch Alliance": "大手・既存",
+  "Lockheed Martin": "大手・既存",
+  "Northrop Grumman": "大手・既存",
+  "L3Harris Technologies": "大手・既存",
+  "Maxar Technologies": "大手・既存",
+  // 日本
+  アストロスケール: "スタートアップ",
+  ispace: "スタートアップ",
+  インターステラテクノロジズ: "スタートアップ",
+  スペースワン: "スタートアップ",
+  将来宇宙輸送システム: "スタートアップ",
+  "Pale Blue": "スタートアップ",
+  Synspective: "スタートアップ",
+  QPS研究所: "スタートアップ",
+  三菱重工業: "大手・既存",
+  "トライサット・コンステレーション（三菱電機・スカパーJSAT・三井物産 ほか）":
+    "コンソーシアム等",
+};
 
 // すべて実在の契約・調達。金額・日付は公式発表または報道に基づき、各 sourceUrl で検証可能。
 // 日本円の案件は amountOriginal(円) を保持し、amountUsd は 1USD=150円 で換算した参考値。
@@ -361,6 +396,236 @@ const curatedGrants: Grant[] = [
     description: "小型SAR衛星による観測網の利用拡大実証（約15億円）",
     sourceUrl: "https://sorabatake.jp/36205/",
   },
+
+  // ===== 米国（2025-2026 の新規大型・スタートアップ向け案件） =====
+  {
+    id: "us-sda-t3tl-lm",
+    company: "Lockheed Martin",
+    country: "US",
+    agency: "Space Development Agency",
+    program: "Tranche 3 Tracking Layer",
+    theme: "宇宙状況監視(SSA)",
+    amountUsd: 1_100_000_000,
+    amountOriginal: 1_100_000_000,
+    currency: "USD",
+    fiscalYear: 2026,
+    awardDate: "2025-12-19",
+    description: "ミサイル追尾衛星18機の製造・運用（Tranche 3、総額$3.5Bの一部）",
+    sourceUrl:
+      "https://www.sda.mil/space-development-agency-makes-awards-to-build-72-tracking-layer-satellites-for-tranche-3/",
+  },
+  {
+    id: "us-sda-t3tl-l3",
+    company: "L3Harris Technologies",
+    country: "US",
+    agency: "Space Development Agency",
+    program: "Tranche 3 Tracking Layer",
+    theme: "宇宙状況監視(SSA)",
+    amountUsd: 843_000_000,
+    amountOriginal: 843_000_000,
+    currency: "USD",
+    fiscalYear: 2026,
+    awardDate: "2025-12-19",
+    description: "ミサイル警戒・追尾衛星18機の製造・運用",
+    sourceUrl:
+      "https://www.l3harris.com/newsroom/press-release/2025/12/space-development-agency-awards-l3harris-843-million-contract",
+  },
+  {
+    id: "us-sda-t3tl-rocketlab",
+    company: "Rocket Lab",
+    country: "US",
+    agency: "Space Development Agency",
+    program: "Tranche 3 Tracking Layer",
+    theme: "宇宙状況監視(SSA)",
+    amountUsd: 816_000_000,
+    amountOriginal: 816_000_000,
+    currency: "USD",
+    fiscalYear: 2026,
+    awardDate: "2025-12-19",
+    description:
+      "ミサイル警戒・追尾・防衛センサー搭載衛星18機のプライム契約（SDA契約累計$1.3B超）",
+    sourceUrl:
+      "https://rocketlabcorp.com/updates/rocket-lab-awarded-816m-prime-contract-to-build-missile-defense-satellite-constellation-for-u-s-space-force/",
+  },
+  {
+    id: "us-sda-t3tl-ng",
+    company: "Northrop Grumman",
+    country: "US",
+    agency: "Space Development Agency",
+    program: "Tranche 3 Tracking Layer",
+    theme: "宇宙状況監視(SSA)",
+    amountUsd: 764_000_000,
+    amountOriginal: 764_000_000,
+    currency: "USD",
+    fiscalYear: 2026,
+    awardDate: "2025-12-19",
+    description: "ミサイル追尾衛星18機の製造・運用",
+    sourceUrl:
+      "https://spaceflightnow.com/2025/12/20/space-development-agency-awards-roughly-3-5-billion-to-4-companies-for-72-missile-tracking-and-warning-satellites/",
+  },
+  {
+    id: "us-stratfi-gravitics",
+    company: "Gravitics",
+    country: "US",
+    agency: "U.S. Space Force (SpaceWERX)",
+    program: "STRATFI 2025（Orbital Carrier）",
+    theme: "宇宙状況監視(SSA)",
+    amountUsd: 60_000_000,
+    amountOriginal: 60_000_000,
+    currency: "USD",
+    fiscalYear: 2025,
+    awardDate: "2025-03-26",
+    description:
+      "軌道上で機動衛星を格納・展開する「オービタルキャリア」実証（最大$60M、政府+民間マッチング）",
+    sourceUrl:
+      "https://www.businesswire.com/news/home/20250326529019/en/Gravitics-Selected-by-Space-Force-for-$60M-STRATFI-to-Demonstrate-Revolutionary-Orbital-Carriers",
+  },
+  {
+    id: "us-stratfi-albedo",
+    company: "Albedo",
+    country: "US",
+    agency: "U.S. Space Force (SpaceWERX)",
+    program: "STRATFI 2025",
+    theme: "衛星・リモートセンシング",
+    amountUsd: 60_000_000,
+    amountOriginal: 60_000_000,
+    currency: "USD",
+    fiscalYear: 2025,
+    awardDate: "2025-03-08",
+    description:
+      "超低軌道の超高解像度光学衛星（8社・総額$440MのSTRATFI枠、1社最大$60M・上限額ベース）",
+    sourceUrl:
+      "https://spacenews.com/spacewerx-selects-eight-companies-for-440-million-in-public-private-partnerships/",
+  },
+  {
+    id: "us-stratfi-leolabs",
+    company: "LeoLabs",
+    country: "US",
+    agency: "U.S. Space Force (SpaceWERX)",
+    program: "STRATFI 2025",
+    theme: "宇宙状況監視(SSA)",
+    amountUsd: 60_000_000,
+    amountOriginal: 60_000_000,
+    currency: "USD",
+    fiscalYear: 2025,
+    awardDate: "2025-03-08",
+    description:
+      "地上レーダー網による低軌道の宇宙状況監視（1社最大$60M・上限額ベース）",
+    sourceUrl:
+      "https://spacenews.com/spacewerx-selects-eight-companies-for-440-million-in-public-private-partnerships/",
+  },
+  {
+    id: "us-stratfi-umbra",
+    company: "Umbra",
+    country: "US",
+    agency: "U.S. Space Force (SpaceWERX)",
+    program: "STRATFI 2025",
+    theme: "衛星・リモートセンシング",
+    amountUsd: 60_000_000,
+    amountOriginal: 60_000_000,
+    currency: "USD",
+    fiscalYear: 2025,
+    awardDate: "2025-03-08",
+    description: "商用SAR衛星コンステレーション（1社最大$60M・上限額ベース）",
+    sourceUrl:
+      "https://spacenews.com/spacewerx-selects-eight-companies-for-440-million-in-public-private-partnerships/",
+  },
+  {
+    id: "us-stratfi-xona",
+    company: "Xona Space Systems",
+    country: "US",
+    agency: "U.S. Space Force (SpaceWERX)",
+    program: "STRATFI 2025",
+    theme: "通信・データリンク",
+    amountUsd: 60_000_000,
+    amountOriginal: 60_000_000,
+    currency: "USD",
+    fiscalYear: 2025,
+    awardDate: "2025-03-08",
+    description:
+      "低軌道からの高精度測位（GPS補完）サービス（1社最大$60M・上限額ベース）",
+    sourceUrl:
+      "https://spacenews.com/spacewerx-selects-eight-companies-for-440-million-in-public-private-partnerships/",
+  },
+  {
+    id: "us-anduril-sda-mesh",
+    company: "Anduril Industries",
+    country: "US",
+    agency: "U.S. Space Force / SDA",
+    program: "SDA メッシュネットワーキング支援（契約変更）",
+    theme: "通信・データリンク",
+    amountUsd: 100_000_000,
+    amountOriginal: 100_000_000,
+    currency: "USD",
+    fiscalYear: 2026,
+    awardDate: "2026-01-15",
+    description: "宇宙領域把握（SDA）向けメッシュネットワーキングの$100M契約変更",
+    sourceUrl:
+      "https://www.govconwire.com/articles/anduril-100m-space-force-sda-contract-modification",
+  },
+
+  // ===== 日本（スタートアップ向け 追加分） =====
+  {
+    id: "jp-fund-ispace-m6",
+    company: "ispace",
+    country: "JP",
+    agency: "JAXA（宇宙戦略基金）",
+    program: "月極域における高精度着陸技術（ミッション6）",
+    theme: "月・深宇宙探査",
+    amountUsd: 20_000_000_000 / 150,
+    amountOriginal: 20_000_000_000,
+    currency: "JPY",
+    fiscalYear: 2026,
+    awardDate: "2026-03-01",
+    description:
+      "2029年の月南極高精度着陸に向けたミッション6開発（最大約200億円）",
+    sourceUrl: "https://prtimes.jp/main/html/rd/p/000000131.000140640.html",
+  },
+  {
+    id: "jp-sbir-ist-sg",
+    company: "将来宇宙輸送システム",
+    country: "JP",
+    agency: "文部科学省",
+    program: "SBIRフェーズ3（民間ロケット）ステージゲート通過",
+    theme: "ロケット・打上げ",
+    amountUsd: 5_000_000_000 / 150,
+    amountOriginal: 5_000_000_000,
+    currency: "JPY",
+    fiscalYear: 2025,
+    awardDate: "2025-06-01",
+    description: "再使用型ロケット開発、ステージゲート審査通過で最大50億円の補助金に採択",
+    sourceUrl: "https://prtimes.jp/main/html/rd/p/000000032.000106229.html",
+  },
+  {
+    id: "jp-sbir-spaceone-p2",
+    company: "スペースワン",
+    country: "JP",
+    agency: "文部科学省",
+    program: "SBIRフェーズ3（民間ロケット）フェーズ2",
+    theme: "ロケット・打上げ",
+    amountUsd: 1_230_000_000 / 150,
+    amountOriginal: 1_230_000_000,
+    currency: "JPY",
+    fiscalYear: 2025,
+    awardDate: "2025-06-01",
+    description: "小型ロケット「カイロス」開発のフェーズ2追加交付（12.3億円）",
+    sourceUrl: "https://sorabatake.jp/38321/",
+  },
+  {
+    id: "jp-sbir-paleblue",
+    company: "Pale Blue",
+    country: "JP",
+    agency: "文部科学省",
+    program: "SBIRフェーズ3（デブリ低減・推進機）",
+    theme: "推進システム",
+    amountUsd: 4_000_000_000 / 150,
+    amountOriginal: 4_000_000_000,
+    currency: "JPY",
+    fiscalYear: 2024,
+    awardDate: "2024-08-01",
+    description: "水を推進剤とする小型衛星用推進機の開発・実証（最大約40億円）",
+    sourceUrl: "https://pale-blue.co.jp/jpn_news/417/",
+  },
 ];
 
 // 自動収集（scripts/collect.mjs が GitHub Actions で定期取得し collected.json に書き出す）。
@@ -370,4 +635,4 @@ const seen = new Set(curatedGrants.map((g) => g.id));
 export const grants: Grant[] = [
   ...curatedGrants,
   ...autoGrants.filter((g) => !seen.has(g.id)),
-];
+].map((g) => ({ ...g, orgType: g.orgType ?? ORG_TYPES[g.company] }));
