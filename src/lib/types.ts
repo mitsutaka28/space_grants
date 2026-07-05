@@ -38,6 +38,11 @@ export interface Grant {
   auto?: boolean;
   /** 企業区分（スタートアップ・大手など）。ソーシング用のフィルタに使用。 */
   orgType?: OrgType;
+  /**
+   * 採択は確認できたが金額が未公表・不明の場合 true。
+   * amountUsd は 0 とし、金額ランキング・合計には影響させず件数ベースの集計にのみ含める。
+   */
+  amountUnknown?: boolean;
 }
 
 /** 円→ドル換算に用いる参考レート（表示用）。 */

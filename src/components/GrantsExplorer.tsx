@@ -200,8 +200,12 @@ export default function GrantsExplorer({ grants }: { grants: Grant[] }) {
                   </span>
                 </td>
                 <td className="px-4 py-2 text-right font-medium text-cyan-300">
-                  {formatUsd(g.amountUsd)}
-                  {g.currency !== "USD" && (
+                  {g.amountUnknown ? (
+                    <span className="text-slate-400">金額不明</span>
+                  ) : (
+                    formatUsd(g.amountUsd)
+                  )}
+                  {!g.amountUnknown && g.currency !== "USD" && (
                     <div className="text-xs font-normal text-slate-400">
                       {formatOriginal(g.amountOriginal, g.currency)}
                     </div>

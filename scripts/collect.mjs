@@ -106,14 +106,31 @@ async function fetchRss({ url, agency, country }) {
   return items;
 }
 
-// ---- JAXA プレスリリース一覧（HTMLスクレイピング） ----
-async function fetchJaxaPress() {
-  const url = "https://www.jaxa.jp/press/index_j.html";
+// 本文中の円建て金額（「約212億円」「25億円」等）を抽出
+function extractAmountJpy(text = "") {
+  const cho = text.match(/([\d.,]+)\s*兆円/);
+  if (cho) return Math.round(parseFloat(cho[1].replace(/,/g, "")) * 1_000_000_000_000);
+  const oku = text.match(/([\d.,]+)\s*億円/);
+  if (oku) return Math.round(parseFloat(oku[1].replace(/,/g, "")) * 100_000_000);
+  return 0;
+}
+
+// ---- 日本の公式お知らせページ（HTMLスクレイピング） ----
+// 採択・契約に関するリンクを抽出。金額がページ上で判明しない場合は
+// amountUnknown: true で保持する（件数ベースの集計・ソーシング用途に使用）。
+const JP_PAGES = [
+  { url: "https://www.jaxa.jp/press/index_j.html", agency: "JAXA" },
+  { url: "https://fund.jaxa.jp/topics/", agency: "JAXA（宇宙戦略基金）" },
+  { url: "https://www.mod.go.jp/j/press/news/index.html", agency: "防衛省" },
+  { url: "https://www.mext.go.jp/b_menu/houdou/index.htm", agency: "文部科学省" },
+];
+
+async function fetchJpPage({ url, agency }) {
   const res = await fetch(url, {
     headers: { "User-Agent": UA },
     signal: AbortSignal.timeout(20000),
   });
-  if (!res.ok) throw new Error(`JAXA press: HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`${agency}: HTTP ${res.status}`);
   const html = await res.text();
   const $ = cheerio.load(html);
   const items = [];
@@ -121,26 +138,33 @@ async function fetchJaxaPress() {
     const title = $(el).text().trim();
     const href = $(el).attr("href");
     if (!title || !href) return;
-    if (!/採択|契約|委託|補助|基金|宇宙戦略/.test(title)) return;
-    const link = href.startsWith("http") ? href : new URL(href, url).toString();
+    if (!/採択|選定|契約|委託|交付|補助|基金|公募.*結果/.test(title)) return;
+    if (!/宇宙|衛星|ロケット|ミサイル|デブリ|月面|探査|打上げ|SAR|コンステ/.test(title)) return;
+    let link;
+    try {
+      link = href.startsWith("http") ? href : new URL(href, url).toString();
+    } catch {
+      return;
+    }
+    const amountJpy = extractAmountJpy(title);
     items.push({
-      id: `auto-jaxa-${hash(link || title)}`,
+      id: `auto-jp-${hash(link || title)}`,
       company: "(詳細は出典参照)",
       country: "JP",
-      agency: "JAXA",
+      agency,
       program: title.slice(0, 120),
       theme: classifyTheme(title),
-      amountUsd: 0,
-      amountOriginal: 0,
+      amountUsd: amountJpy > 0 ? Math.round(amountJpy / 150) : 0,
+      amountOriginal: amountJpy,
       currency: "JPY",
       fiscalYear: new Date().getFullYear(),
       awardDate: "",
       description: title.slice(0, 140),
       sourceUrl: link,
       auto: true,
+      ...(amountJpy === 0 ? { amountUnknown: true } : {}),
     });
   });
-  // 金額が不明な項目はノイズが多いため除外（後段のフィルタで切られる）
   return items;
 }
 
@@ -157,16 +181,21 @@ async function main() {
     }
   }
 
-  try {
-    const rows = await fetchJaxaPress();
-    collected.push(...rows);
-    console.log(`JAXA press: ${rows.length}`);
-  } catch (e) {
-    console.error(`skip JAXA press: ${e.message}`);
+  for (const page of JP_PAGES) {
+    try {
+      const rows = await fetchJpPage(page);
+      collected.push(...rows);
+      console.log(`JP ${page.agency}: ${rows.length}`);
+    } catch (e) {
+      console.error(`skip ${page.agency}: ${e.message}`);
+    }
   }
 
   const MIN_AMOUNT = 2_000_000;
-  const usable = collected.filter((g) => g.amountUsd >= MIN_AMOUNT);
+  const MAX_UNKNOWN = 50; // 金額不明の採択情報は最新50件まで保持
+  const withAmount = collected.filter((g) => !g.amountUnknown && g.amountUsd >= MIN_AMOUNT);
+  const unknown = collected.filter((g) => g.amountUnknown).slice(0, MAX_UNKNOWN);
+  const usable = [...withAmount, ...unknown];
   if (usable.length === 0) {
     console.error("No data collected (network restricted, or no qualifying items this run). Keeping existing file.");
     if (!existsSync(OUT)) writeFileSync(OUT, "[]\n");

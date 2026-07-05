@@ -3,7 +3,7 @@ name: Collect awards
 # 宇宙・防衛関連の政府調達を定期収集し、変更があれば collected.json をコミットする。
 on:
   schedule:
-    - cron: "0 21 * * 1" # 毎週月曜 21:00 UTC（日本時間 火曜 06:00）
+    - cron: "0 21 * * *" # 毎日 21:00 UTC（日本時間 06:00）
   workflow_dispatch: {} # 手動実行も可能
 
 permissions:

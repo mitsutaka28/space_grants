@@ -89,8 +89,12 @@ function ContractRows({
               </div>
             </td>
             <td className="py-2 text-right text-slate-200">
-              {formatUsd(g.amountUsd)}
-              {g.currency !== "USD" && (
+              {g.amountUnknown ? (
+                <span className="text-slate-400">金額不明</span>
+              ) : (
+                formatUsd(g.amountUsd)
+              )}
+              {!g.amountUnknown && g.currency !== "USD" && (
                 <div className="text-xs text-slate-400">
                   {formatOriginal(g.amountOriginal, g.currency)}
                 </div>

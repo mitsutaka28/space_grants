@@ -157,8 +157,12 @@ export default function SourcingView({ grants }: { grants: Grant[] }) {
                     </span>
                   </div>
                   <div className="shrink-0 text-sm font-medium text-cyan-300">
-                    {formatUsd(g.amountUsd)}
-                    {g.currency !== "USD" && (
+                    {g.amountUnknown ? (
+                      <span className="text-slate-400">金額不明</span>
+                    ) : (
+                      formatUsd(g.amountUsd)
+                    )}
+                    {!g.amountUnknown && g.currency !== "USD" && (
                       <span className="ml-1 text-xs font-normal text-slate-400">
                         （{formatOriginal(g.amountOriginal, g.currency)}）
                       </span>
